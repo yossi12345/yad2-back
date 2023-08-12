@@ -33,7 +33,8 @@ const upload = multer({
         fileSize:100*1024*1024
     } 
 });
-
+const sendEmail = require("../mail/sendMail");
+const getHtmlForValidationNumberMail = require("../mail/getHtmlForValidationNumberMail");
 
 
 router.post("/new-user",validateSchema(createUserSchema),handleCreateUser)
@@ -43,5 +44,21 @@ router.post("/login",handleUserLogin)
 router.post("/new-apartment",authToken,handleCreateApartmentInDb)
 
 router.patch("/upload-images",upload.array("images",6),handleUploadImages)
+
+router.post("/mail",async(req,res)=>{
+  const verifyNumber=123456
+  try{
+    const info=await sendEmail({
+      to:req.body.mail,
+      subject:"אימות מייל",
+      html:getHtmlForValidationNumberMail(verifyNumber)
+    })
+    console.log("ss",info)
+    res.send({success:true,verifyNumber})
+  }catch(err){
+    res.status(500).send({success:false})
+    console.log({err})
+  }
+})
 
 module.exports=router;
